@@ -1,0 +1,253 @@
+\documentclass[10pt]{article}
+
+%\VignetteIndexEntry{maCorrPlot Introduction}
+%\VignetteDepends{}
+%\VignetteKeywords{microarray, expression data, normalization, diagnostic}
+%\VignettePackage{maCorrPlot}
+
+\usepackage{natbib}
+
+%% avoids the [T1] for Sweave.sty
+%% NB, the following commented \usepackage is necessary!
+%% instead of \usepackage{Sweave}
+\RequirePackage[T1]{fontenc}
+\RequirePackage{graphicx,ae,fancyvrb}
+\IfFileExists{upquote.sty}{\RequirePackage{upquote}}{}
+\setkeys{Gin}{width=0.8\textwidth}
+\DefineVerbatimEnvironment{Sinput}{Verbatim}{fontshape=sl}
+\DefineVerbatimEnvironment{Soutput}{Verbatim}{}
+\DefineVerbatimEnvironment{Scode}{Verbatim}{fontshape=sl}
+\newenvironment{Schunk}{}{}
+%% End Sweave.sty
+
+%% The options
+\SweaveOpts{eps=FALSE, prefix.string=pix/maCorrPlot} 
+
+\newcommand{\Robject}[1]{{\texttt{#1}}}
+\newcommand{\Rfunction}[1]{{\texttt{#1}}}
+\newcommand{\Rpackage}[1]{{\texttt{#1}}}
+\newcommand{\Rclass}[1]{{\texttt{#1}}}
+\newcommand{\Rmethod}[1]{{\texttt{#1}}}
+\newcommand{\Rfunarg}[1]{{\texttt{#1}}}
+
+\begin{document}
+
+\title{Introduction to the \Rpackage{maCorrPlot} package}
+\author{Alexander Ploner\\
+Medical Epidemiology \& Biostatistics\\
+Karolinska Institutet, Stockholm\\
+email: \texttt{alexander.ploner@ki.se}}
+
+\maketitle
+
+%% Reduce output line width
+<<echo=FALSE, results=hide>>=
+options(width=65)
+@
+
+\begin{abstract}
+The \Rpackage{maCorrPlot} package implements the graphical diagnostic for microarray normalization described in \citet{Ploner05a}.
+\end{abstract}
+
+\tableofcontents
+
+\section{Preparations}
+
+Load the library:
+<<>>=
+library(maCorrPlot)
+@
+The example data comprises two data sets A and B, both with MAS5 and RMA expression values as well as MAS5 absent/present calls:
+<<>>=
+data(oligodata)
+ls()
+@
+All example data has the same size, 5000 genes and 50 samples, and is anonymized. The MAS5 values are logarithmized and normalized to the global mean:
+<<>>=
+dim(datA.mas5)
+datA.mas5[1:5, 1:5]
+@
+
+\section{A basic run}
+
+The idea is that random pairs of genes should \textit{on average} be have zero correlation. We start therefore by drawing a random sample of pairs from the RMA values for data set A:
+<<>>=
+corrA.rma = CorrSample(datA.rma, np=1000, seed=213)
+@
+This specifies the data set to use, the number of random pairs of genes (1000), and the starting seed for the random sampling (for the sake of replicability).
+
+The random sample can then be plotted to produce Figure~\ref{fig1a}:
+<<eval=FALSE>>=
+plot(corrA.rma)
+@
+This plots the average correlation as a function of the average variability of the pair of genes: the average correlation for the pairs of genes with the lowest variability is clearly positive, and the confidence intervals (vertical bars) indicate that this effect is much larger than expected by chance. We conclude that there is some issue with the normalization of low-variance genes in the RMA data.
+
+Note that \Robject{corrA.rma} is basically just a data frame that contains the required information for plotting, plus some auxiliary quantities:
+<<>>=
+corrA.rma[1:5,]
+@
+
+\begin{figure}
+\begin{center}
+<<fig=TRUE, results=hide>>=
+jj = plot(corrA.rma)
+print(jj)
+@
+\caption{Basic correlation plot for the RMA values of data set A. Note that the assignment to \Robject{jj} and the extra print command shown above the figure are required by the vignette setup; \Rfunction{plot(corrA.rma)} on its own is sufficient for interactive data analysis.\label{fig1a}}
+\end{center}
+\end{figure}
+
+\section{Extra plotting options}
+
+By default, only the average correlations are shown, as in Figure~\ref{fig1a}, but the underlying correlations and average standard deviations can be included via \Rfunarg{scatter=TRUE}, see Figure~\ref{fig1b}.
+
+Additionally, a very simple theoretical model for lack of normalization can be overlayed on the curve of average correlations via \Rfunarg{model=TRUE}, see \citet{Ploner05a} for details. In Figure~\ref{fig1b}, the agreement betwen the red model curve and the average correlations is only approximate, indicating that the situation here is more complex than the simple model.
+
+
+\begin{figure}
+\begin{center}
+<<fig=TRUE, results=hide>>=
+jj = plot(corrA.rma, scatter=TRUE, curve=TRUE)
+print(jj)
+@
+\caption{Correlation plot for the RMA values of data set A, with added scatter and model curve\label{fig1b}}
+\end{center}
+\end{figure}
+
+\section{Multiple plots}
+
+\subsection{Comparing datasets and/or expression measures}
+
+Multiple objects created by \Rfunction{CorrSample} can be shown in the same plot. This allows easy comparison of normalization problems between different expression measures, different data sets, or both.
+
+Let's start with comparing the MAS5 expression values of dataset A with the RMA values. First we draw a random sample of genes from dataset A and compute their correlations etc.:
+<<>>=
+corrA.mas5 = CorrSample(datA.mas5, np=1000, seed=213)
+@
+Then we plot the sampled correlations for both data sets:
+<<eval=FALSE>>=
+plot(corrA.mas5, corrA.rma, cond=c("MAS5","RMA"))
+@
+This produces Figure~\ref{fig2a}. Note that we use the argument \Rfunarg{cond} to specify appropriate labels for the plot; if it is missing, the plots are just numbered in the order in which they appear in the argument list.
+
+Let's assume that we want to compare MAS5 and RMA for both datasets, A and B, at the same time. We first sample random pairs of genes for dataset B:
+<<>>=
+corrB.rma = CorrSample(datB.rma, np=1000, seed=214)
+corrB.mas5 = CorrSample(datB.mas5, np=1000, seed=214)
+@
+We can then go ahead and plot everything in the same manner as before:
+<<eval=FALSE>>=
+plot(corrA.mas5, corrA.rma, corrB.mas5, corrB.rma, cond=c("MAS5/A","RMA/A","MAS5/B","RMA/B"))
+@
+This perfectly feasible, though \Rfunarg{cond} can be specified differently to create the somewhat more pleasing arrangement shown in Figure~\ref{fig2b}:
+<<eval=FALSE>>=
+plot(corrA.mas5, corrA.rma, corrB.mas5, corrB.rma, cond=list(c("MAS5","RMA","MAS5","RMA"), c("A","A","B","B")))
+@
+Here we specify a list of two factors that characterize the objects to be plotted independently, which results in the nested plot titels in Figure~\ref{fig2b}. 
+
+\begin{figure}
+\begin{center}
+<<fig=TRUE, results=hide>>=
+jj = plot(corrA.mas5, corrA.rma, cond=c("MAS5","RMA"))
+print(jj)
+@
+\caption{Multiple correlation plot, showing the correlation plot for both MAS5 and RMA values of dataset A.\label{fig2a}}
+\end{center}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+<<fig=TRUE, results=hide>>=
+jj = plot(corrA.mas5, corrA.rma, corrB.mas5, corrB.rma, cond=list(c("MAS5","RMA","MAS5","RMA"), c("A","A","B","B")))
+print(jj)
+@
+\caption{Multiple correlation plot, showing the correlation plot for MAS5 and RMA values for both dataset A and B.\label{fig2b}}
+\end{center}
+\end{figure}
+
+\subsection{Comparing different groups of genes}
+
+We may want to compare directly how well different groups of genes are normalized within the same data set and for the same expression measure. One possibility of doing this would be to sub-divide the original dataset, to run \Rfunction{CorrSample} separately on the different subsamples, and to plot these together, as demonstrated in the previous section.
+
+The \Rfunction{plot}-method for objects created by \Rfunction{CorrSample} however supports a different mechanism that allows to show different correlation curves overlayed in the same plot. We demonstrate this mechanism by comparing the correlation curves of genes that were reliably measured (i.e. have a high number of present calls) and genes that were not (i.e. have a low percentage of present calls).
+
+We start by computing the number of present calls for each gene:
+<<>>=
+pcntA = rowSums(datA.amp=="P")
+@
+Each gene has between 0 and 30 present calls; in our example, genes tend to have either all present calls or no present calls, see Figure~\ref{fig3a}(a). Correspondingly, if we compute the average number of present calls for the random pairs of genes for which we have computed the correlations,
+<<>>=
+pcntA.pairs = (pcntA[corrA.rma$ndx1]+pcntA[corrA.rma$ndx2])/2
+@
+these pairs will come in three flavors: pairs that are both present, pairs that are both absent, and mixed pairs, see Figure~\ref{fig3a}(b), and we can define a useful classification of the pairs of genes as follows:
+<<>>=
+pgrpA.pairs = cut(pcntA.pairs, c(0, 10, 20, 30), include.lowest=TRUE)
+table(pgrpA.pairs)
+@
+This classification is now simply passed to \Rfunction{plot} via the argument \Rfunarg{group}:
+<<eval=FALSE>>=
+plot(corrA.rma, groups=pgrpA.pairs, auto.key=TRUE)
+@
+This results in Figure~\ref{fig3b}, showing the correlation cruves for the three different classes of pairs in different colors. It appears that the extra correlation at the origin is due to pairs where both genes have few or no present calls.
+
+Note that the argument \Rfunarg{auto.key} creates the legend at the top of Figure~\ref{fig3b}. Generally, all arguments to \Rfunction{xyplot} can be used in calls to this \Rfunction{plot}-method.  
+
+\begin{figure}
+\begin{center}
+<<fig=TRUE, results=hide, echo=FALSE, width=6, height=3>>=
+par(mfrow=c(1,2))
+hist(pcntA, main="(a) pcntA", xlab="No. of present calls")
+hist(pcntA.pairs, main="(b) pcntA.pairs", xlab="Average no. of present calls")
+@
+\caption{Distribution of the number of present calls on the 30 chips for all 5000 genes in dataset A (left), and of the average number of present calls for the random pairs of genes oused in \Robject{corrA.rma} (right).\label{fig3a}}
+\end{center}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+<<fig=TRUE, results=hide>>=
+jj = plot(corrA.rma, groups=pgrpA.pairs, auto.key=TRUE)
+print(jj)
+@
+\caption{Multiple correlation plots for pairs of genes with low, medium, and high average number of present calls between them.\label{fig3b}}
+\end{center}
+\end{figure}
+
+\subsection{Multiple expression measures and multiple groups combined}
+
+Figure~\ref{fig4a} shows how multiple expression measures and groups of genes can be combined in the same plot. Note that we make use of the fact that we had the same random seed, and therefore the same random pairs of genes for both MAS5 and RMA, therefore we can recycle the classification variable \Robject{pgrpA.pairs}.
+
+\begin{figure}
+\begin{center}
+<<fig=TRUE, results=hide>>=
+jj = plot(corrA.mas5, corrA.rma, cond=c("MAS5","RMA"), groups=list(pgrpA.pairs, pgrpA.pairs), nint=5, ylim=c(-0.25, 0.4))
+print(jj)
+@
+\caption{Multiple correlation plot for different groups of genes and two different expression measures. The number of intervals for which we compute average correlations has been reduced to five to avoid clutter, and the vertical axis of the plot has been reduced to avoid empty space.\label{fig4a}}
+\end{center}
+\end{figure}
+
+\section{Caveats}
+
+These plots are a fairly useful tool for detecting spurious correlations due to failure of normalization, but please consider the following points:
+\begin{enumerate}
+\item This approach has been developed for oligonucleotide/one-dye chips. The principle should apply equally to cDNA/two-dye chips, and some people have found it useful in that context, but I've no experience with it myself.
+\item This approach will work for chips with a large number of genes, say an Affymetrix HGU133A chip. For much smaller chips, especially boutique chips, the assumption of zero average correlation may not make sense.
+\item This approach can be used to compare different normalizations or expression measures for a specific data set, but it has nothing to say about the quality of an expression measure in its own right, e.g. its bias or lack thereof in estimating fold changes, or the like.
+\end{enumerate}
+
+\bibliographystyle{plainnat}
+\begin{thebibliography}{1}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Ploner et~al.(2005)]{Ploner05a}
+Ploner A, Miller LD, Hall P, Bergh J and Pawitan Y. (2005)
+\newblock Correlation test to assess low-level processing of high-density oligonucleotide microarray data.
+\newblock \emph{BMC Bioinformatics}, 6:\penalty0 80.
+\end{thebibliography}
+
+\end{document}
