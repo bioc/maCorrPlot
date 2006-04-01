@@ -72,6 +72,8 @@ plot.corr.sample = function(x, ..., cond, groups, grid=TRUE, refline=TRUE,
 #       060306 multiple groups and conds use the same set of factor levels
 #               across corr.sample objects - better auto.key
 #              check for cond that averages across objects   
+#       060401 changed name of first argument to xyplot
+#              added type="o" to common.arg b/o trouble with panel.superpose
 #
 {
     require(lattice)
@@ -83,8 +85,11 @@ plot.corr.sample = function(x, ..., cond, groups, grid=TRUE, refline=TRUE,
     latt.arg = args[!ndx] # May be empty
     
     # Set up the common arguments
+    # Note that type=o" is hardcoded to preserve the look, and to avoid 
+    # hassle with panel.superpose down the road in panel.corr.sample
     common.arg = list(grid=grid, refline=refline, scatter=scatter, curve=curve,
-                      ci=ci, nint=nint, length=length, xlab=xlab, alpha=alpha)
+                      ci=ci, nint=nint, length=length, xlab=xlab, alpha=alpha,
+                      type="o")
     common.arg = c(common.arg, latt.arg)
     # Translate the convenience parameters
     common.arg$scales$x$log = xlog
@@ -92,7 +97,7 @@ plot.corr.sample = function(x, ..., cond, groups, grid=TRUE, refline=TRUE,
     # One or several correlations?
     nc = length(corr.arg) 
     if (nc == 1) {
-        args = list(formula=Correlation~StdDev, data=corr.arg[[1]])
+        args = list(x=Correlation~StdDev, data=corr.arg[[1]])
         if (missing(groups)) {
             args$panel = panel.corr.sample
         } else {
@@ -136,7 +141,7 @@ plot.corr.sample = function(x, ..., cond, groups, grid=TRUE, refline=TRUE,
         # Now check whether we have (combined) as many conditions as objects
         if (length(unique(cond.check))!=nc)
             warning("Correlations are averaged across objects - check cond")
-        args = list(formula=as.formula(formula.char), data=x)
+        args = list(x=as.formula(formula.char), data=x)
         if (missing(groups)) {
             args$panel = panel.corr.sample
         } else { # we require a list of group vectors (eg a data.frame)
@@ -177,14 +182,19 @@ panel.corr.sample = function(x,y, grid=TRUE, refline=TRUE, xlog=TRUE, scatter=FA
 # Auth: Alexander.Ploner@ki.se 200206
 #
 # Chng: 060306 added check for empty panel (sigh)
+#       060401 removed explicit type="o" from call to panel.xyplot, cos
+#              this conflicted with panel.superpose; type="o" is now hidden
+#              in ... and had therefore to be removed from the scatter-option
+#              So, no multi-symbol scatter for the moment
 #
 {
     if (missing(col.line)) 
         col.line = trellis.par.get("plot.line")$col
     if (missing(col.symbol)) 
         col.symbol = gray(0.4)    
+    # If 
     if (scatter) {
-        panel.xyplot(x,y, col.symbol=col.symbol, ...)
+        panel.xyplot(x,y, col.symbol=col.symbol)
     }        
     if (grid) {
         panel.grid(h=-1, v=-1)
@@ -197,7 +207,7 @@ panel.corr.sample = function(x,y, grid=TRUE, refline=TRUE, xlog=TRUE, scatter=FA
     # Ok, still with us        
     xx = cbind(y,x)
     cc = CutCI(xx, number=nint, alpha=alpha)
-    panel.xyplot(cc$x, cc$y, type="o", col.line=col.line, ...)
+    panel.xyplot(cc$x, cc$y, col.line=col.line, ...)
     if (ci) {
         panel.arrows(cc$x, cc$yci[,1], cc$x, cc$yci[,2], code=3,  
                      angle=90, length=length, col=col.line)
