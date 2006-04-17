@@ -52,7 +52,7 @@ Ploner A, Miller LD, Hall P, Bergh J, Pawitan Y. Correlation test to assess low-
 }
 \author{Alexander Ploner \email{Alexander.Ploner@ki.se}}
 \section{Warning }{\code{cond} is translated into conditioning variables for \code{xyplot}, which will not hesitate to average correlations across different \code{corr.sample} objects. It's hard to see when this would be a good idea, therefore \code{plot.corr.sample} will generate a warning.}
-\seealso{\code{\link{CorrSample}}, \code{\link{xyplot}}}
+\seealso{\code{\link{CorrSample}}, \code{\link[lattice]{xyplot}}}
 \examples{
 # Get small example data
 data(oligodata)
