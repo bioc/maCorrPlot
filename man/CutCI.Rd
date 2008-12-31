@@ -25,12 +25,10 @@ The quantiles for the confidence interval are taken from the standard normal dis
 }
 \value{
 \code{CutCI} returns invisibly a list of length three:
-
-\itemize{
   \item{x}{the midpoints of the grouping intervals}
   \item{y}{the means within each interval, as computed by \code{func}}
   \item{yci}{a matrix with two columns, giving the lower and upper end of the confidence interval respectively}
-}
+
 
 \code{CIrho} returns a vector of length two, containing the lower and upper end of the confidence interval.
 }

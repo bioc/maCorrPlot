@@ -28,13 +28,12 @@ The sample of random pairs can be specified in a replicable manner either via \c
 An object of class \code{corr.sample}; this is just a data frame with an extra class tag to allow for a plotting method. 
 
 The data frame has \code{np} rows and nine columns: 
-\itemize{
 \item{\code{Correlation}}{the correlation between the two genes across samples}
 \item{\code{StdDev}}{the geometric mean of the standard deviations of the two genes}
 \item{\code{sd1},\code{sd2}}{the standard deviations of the genes}
 \item{\code{m1},\code{m2}}{the means of the genes}
 \item{\code{ndx1},\code{ndx2}}{the indices of the two genes; by default, these will be the corresponding row indices of \code{x}, but if \code{rp} is specified, they might be gene names.}
-}}
+}
 \references{
 Ploner A, Miller LD, Hall P, Bergh J, Pawitan Y. Correlation test to assess low-level processing of high-density oligonucleotide microarray data. BMC Bioinformatics, 2005, 6(1):80 
 \url{http://www.pubmedcentral.gov/articlerender.fcgi?tool=pubmed&pubmedid=15799785}
