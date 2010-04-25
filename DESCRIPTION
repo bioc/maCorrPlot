@@ -6,6 +6,7 @@ Description: Graphically displays correlation in microarray data that is due to
  insufficient normalization
 Maintainer: Alexander Ploner <Alexander.Ploner@ki.se>
 Depends: lattice
+Imports: graphics, grDevices, lattice, stats
 License: GPL (>= 2)
 biocViews: Microarray, Preprocessing, Visualization
 URL: http://www.pubmedcentral.gov/articlerender.fcgi?tool=pubmed&pubmedid=15799785

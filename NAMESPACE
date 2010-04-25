@@ -1,0 +1,7 @@
+importFrom(graphics, co.intervals)
+importFrom(grDevices, gray)
+importFrom(lattice, panel.abline, panel.arrows, panel.grid,
+           panel.superpose, panel.xyplot, trellis.par.get)
+importFrom(stats, as.formula, cor, lm, predict, qnorm, sd)
+
+export(CIrho, CorrSample, CutCI, panel.corr.sample, plot.corr.sample, RandPairs)
