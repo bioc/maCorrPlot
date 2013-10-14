@@ -1,6 +1,6 @@
 Package: maCorrPlot
 Title: Visualize artificial correlation in microarray data
-Version: 1.31.0
+Version: 1.32.0
 Author: Alexander Ploner <Alexander.Ploner@ki.se> 
 Description: Graphically displays correlation in microarray data that is due to
  insufficient normalization
