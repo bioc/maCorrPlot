@@ -5,3 +5,5 @@ importFrom(lattice, panel.abline, panel.arrows, panel.grid,
 importFrom(stats, as.formula, cor, lm, predict, qnorm, sd)
 
 export(CIrho, CorrSample, CutCI, panel.corr.sample, plot.corr.sample, RandPairs)
+
+S3method(plot, corr.sample)

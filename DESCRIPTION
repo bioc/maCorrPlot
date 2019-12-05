@@ -1,6 +1,6 @@
 Package: maCorrPlot
 Title: Visualize artificial correlation in microarray data
-Version: 1.57.0
+Version: 1.57.1
 Author: Alexander Ploner <Alexander.Ploner@ki.se> 
 Description: Graphically displays correlation in microarray data that is due to
  insufficient normalization
@@ -10,4 +10,3 @@ Imports: graphics, grDevices, lattice, stats
 License: GPL (>= 2)
 biocViews: Microarray, Preprocessing, Visualization
 URL: http://www.pubmedcentral.gov/articlerender.fcgi?tool=pubmed&pubmedid=15799785
-
